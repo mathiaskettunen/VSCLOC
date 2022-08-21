@@ -1,0 +1,35 @@
+import processing.serial.*;
+Serial myPort;
+String data="6.70m/s. 975mm. 000mm Current Offset.";
+String[] list = split(data, ". ");
+void setup()
+{
+  size(1400,800);
+  surface.setTitle("Velocity");
+  surface.setResizable(true);
+  surface.setLocation(100, 100);
+  noStroke();
+  noFill();
+ 
+  printArray(Serial.list());
+  myPort = new Serial(this, Serial.list()[0], 115200);
+  myPort.bufferUntil(10);
+}
+ 
+void draw()
+{ 
+  //String s = list[1] + list[2];
+  background(255);
+  fill(100);
+  textSize(800);
+  text(list[0],1,750); //BIG Text
+  textSize(100);
+  text(list[1],1,90);
+  text(list[2],500,90);
+  printArray(list);
+}
+ 
+void serialEvent(Serial myPort)
+{
+  data = myPort.readStringUntil(10);
+}
