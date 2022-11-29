@@ -1,0 +1,90 @@
+#include <OneWire.h>
+#include <Adafruit_CharacterOLED.h>
+Adafruit_CharacterOLED lcd(OLED_V2, 6, 7, 8, 9, 10, 11, 12);
+OneWire ds(5);
+
+void setup()
+{
+  Serial.begin(115200);
+  lcd.begin(16, 2);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("  -Dallas  ID- ");
+  lcd.setCursor(0, 1);
+}
+
+void loop()
+{
+  byte i;
+  byte data[8];
+  byte crc_calc;    //calculated CRC
+  byte crc_byte;    //actual CRC as sent by DS2401
+  bool presence = ds.reset();
+  
+if (presence != 0)
+{
+    ds.write(0x33);  //Send Read data command
+    
+    for (i = 1; i<9; i++)
+        {
+          data[i] = ds.read();
+          }
+        
+    delay(1);
+    
+    for (i = 8; i>0; i--)
+        {
+          PrintTwoDigitHex (data[i], 0);
+          }
+        
+    lcd.setCursor(0, 1);
+    }
+     
+else
+{
+    lcd.setCursor(0, 1);
+    lcd.print("  NO ID FOUND!  ");
+    
+    for (i = 1; i<9; i++)
+        {
+          data[i] = 0xFF;
+          }
+    }
+
+    
+    for(int i = 8; i>0; i--)
+    {
+      PrintTwoDigitHexSERIAL(data[i], HEX);
+      }
+
+      crc_byte = data[8];
+      crc_calc = OneWire::crc8(data, 8);
+
+      /*if (crc_byte == crc_calc)
+      {
+        Serial.print(",CRC OK!");
+      }
+
+    /*Serial.print("Calculated CRC: ");
+    PrintTwoDigitHexSERIAL (crc_calc, 1);
+
+    Serial.print("Actual CRC: ");
+    PrintTwoDigitHexSERIAL (crc_byte, 1);*/
+    
+      Serial.println();
+      delay(100);
+    
+}
+
+
+void PrintTwoDigitHex (byte b, bool presence)
+{
+  lcd.print(b/16, HEX);
+  lcd.print(b%16, HEX);
+}
+
+void PrintTwoDigitHexSERIAL (byte b, bool presence)
+{
+  Serial.print(b/16, HEX);
+  Serial.print(b%16, HEX);
+}
